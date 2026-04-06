@@ -467,12 +467,19 @@ void Turtlebot3Sensor::initDHT(void) {
   p_dht->begin();
 }
 
-// add: 온도 읽기
+// add: 온도 읽기 (정수일 경우를 대비해 명시적 형변환 추가)
 float Turtlebot3Sensor::getTemperature(void) {
-  return p_dht->readTemperature();
+  float temp = p_dht->readTemperature();
+  
+  // 만약 센서값이 읽히지 않으면(NaN) 0.0 반환, 성공하면 float으로 확실히 변환
+  if (isnan(temp)) return 0.0f; 
+  return (float)temp; 
 }
 
-// add: 습도 읽기
+// add: 습도 읽기 (정수일 경우를 대비해 명시적 형변환 추가)
 float Turtlebot3Sensor::getHumidity(void) {
-  return p_dht->readHumidity();
+  float humi = p_dht->readHumidity();
+  
+  if (isnan(humi)) return 0.0f;
+  return (float)humi;
 }
