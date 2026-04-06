@@ -805,15 +805,16 @@ void update_environmental_sensors(uint32_t interval_ms)
 
 
     // 5. 디버깅 출력 (0.5초마다)
-    if(millis() - last_print_time >= 500){
-      last_print_time = millis();
-      Serial.print("raw_gas_d: "); Serial.print(raw_gas_d);
-      Serial.print("| [Flame] Status: "); Serial.print(control_items.flame_digital_status);
-      Serial.print(" (A:"); Serial.print(raw_flame_a); Serial.print(")");
-      Serial.print(" | [Gas] Status: "); Serial.print(control_items.gas_digital_status);
-      Serial.print(" (A:"); Serial.print(raw_gas_a); Serial.println(")");
-      Serial.print("Temp: "); Serial.println(control_items.dht_temp);
-    }
+    // if(millis() - last_print_time >= 500){
+    //   last_print_time = millis();
+    //   Serial.print("raw_gas_d: "); Serial.print(raw_gas_d);
+    //   Serial.print("| [Flame] Status: "); Serial.print(control_items.flame_digital_status);
+    //   Serial.print(" (A:"); Serial.print(raw_flame_a); Serial.print(")");
+    //   Serial.print(" | [Gas] Status: "); Serial.print(control_items.gas_digital_status);
+    //   Serial.print(" (A:"); Serial.print(raw_gas_a); Serial.println(")");
+    //   Serial.print(" | Temp: "); Serial.println(control_items.dht_temp);
+    //   Serial.print(", Humidity: "); Serial.println(control_items.dht_humi);
+    // }
   }
 }
 
