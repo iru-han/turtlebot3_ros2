@@ -117,7 +117,7 @@ static void update_times(uint32_t interval_ms);
 static void update_gpios(uint32_t interval_ms);
 static void update_motor_status(uint32_t interval_ms);
 static void update_battery_status(uint32_t interval_ms);
-static void update_analog_sensors(uint32_t interval_ms);
+static void update_environmental_sensors(uint32_t interval_ms);
 static void update_joint_status(uint32_t interval_ms);
 
 
@@ -633,7 +633,7 @@ void TurtleBot3Core::run()
   update_gpios(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_motor_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_battery_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
-  update_analog_sensors(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  update_environmental_sensors(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_joint_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
 
   // Packet processing with ROS2 Node.
@@ -726,7 +726,7 @@ void update_battery_status(uint32_t interval_ms)
 }
 
 // add: 로그용
-// void update_analog_sensors(uint32_t interval_ms)
+// void update_environmental_sensors(uint32_t interval_ms)
 // {
 //   static uint32_t pre_time = 0;
 //   static uint32_t last_print_time = 0; // 프린트 주기 관리용 추가
@@ -751,7 +751,7 @@ void update_battery_status(uint32_t interval_ms)
 //   }
 // }
 
-void update_analog_sensors(uint32_t interval_ms)
+void update_environmental_sensors(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
   static uint32_t last_print_time = 0;
