@@ -153,7 +153,7 @@ enum ControlTableItemAddr{
   ADDR_FLAME_DIGITAL = 144, // add: 불꽃 센서 상태 주소 (32번)
   ADDR_GAS_DIGITAL = 145, // add: 가스 디지털 (33번)
   ADDR_FLAME_ANALOG = 190, // add: 불꽃 아날로그 (2바이트 uint16 용)
-  ADDR_GAS_ANALOG = 54, // add: 가스 아날로그 (2바이트 uint16 용)
+  ADDR_GAS_ANALOG = 192, // add: 가스 아날로그 (2바이트 uint16 용)
   ADDR_DHT_TEMP = 112, // add: 온도
   ADDR_DHT_HUMI = 116, // add: 습도
 
@@ -763,7 +763,7 @@ void update_environmental_sensors(uint32_t interval_ms)
     pre_time = millis();
 
     // 조도, IR, 소나 업데이트
-    control_items.illumination = (uint16_t)sensors.getIlluminationData();
+    control_items.illumination = (float)sensors.getIlluminationData();
     control_items.ir_sensor = (uint32_t)sensors.getIRsensorData();
     control_items.sornar = (float)sensors.getSonarData();
 
