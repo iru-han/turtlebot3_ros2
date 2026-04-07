@@ -591,7 +591,7 @@ void TurtleBot3Core::begin(const char* model_name)
   sensors.calibrationGyro();
 
   //To indicate that the initialization is complete.
-  sensors.makeMelody(1); 
+  // sensors.makeMelody(1); 
 
   DEBUG_PRINTLN("Begin End...");
 }
@@ -756,6 +756,7 @@ void update_environmental_sensors(uint32_t interval_ms)
   static uint32_t pre_time = 0;
   static uint32_t pre_time_dht = 0; // add: 온습도 전용 타이머 변수
   static uint32_t last_beep_time = 0;
+  static uint32_t last_print_time = 0;
 
   // [Part 1] 빠른 센서들 (기존 interval_ms 주기: 보통 30ms)
   if(millis() - pre_time >= interval_ms){
@@ -773,7 +774,7 @@ void update_environmental_sensors(uint32_t interval_ms)
     if (raw_flame_a <= 300) control_items.flame_digital_status = 1;
     else control_items.flame_digital_status = 0;
 
-    if (raw_gas_a >= 400) control_items.gas_digital_status = 1;
+    if (raw_gas_a >= 500) control_items.gas_digital_status = 1;
     else control_items.gas_digital_status = 0;
 
     // 경고음 로직
@@ -786,6 +787,18 @@ void update_environmental_sensors(uint32_t interval_ms)
 
     control_items.flame_analog_value = raw_flame_a;
     control_items.gas_analog_value = raw_gas_a;
+
+    
+  
+    // 5. 디버깅 출력 (0.5초마다)
+    // if(millis() - last_print_time >= 500){
+    //   last_print_time = millis();
+        
+    //   Serial.print("[DEBUG] Flame A: "); Serial.print(raw_flame_a);
+    //   Serial.print(" | Gas A: "); Serial.print(raw_gas_a);
+    //   Serial.print(" | Flame D: "); Serial.print(control_items.flame_digital_status);
+    //   Serial.print(" | Gas D: "); Serial.println(control_items.gas_digital_status);
+    // }
   }
 
   // [Part 2] 느린 센서 (온습도 전용 주기: 2000ms 추천)
@@ -798,18 +811,8 @@ void update_environmental_sensors(uint32_t interval_ms)
     control_items.dht_temp = sensors.getTemperature();
     control_items.dht_humi = sensors.getHumidity();
 
-    // 5. 디버깅 출력 (0.5초마다)
-    // if(millis() - last_print_time >= 500){
-    //   last_print_time = millis();
-    //   Serial.print("raw_gas_d: "); Serial.print(raw_gas_d);
-    //   Serial.print("| [Flame] Status: "); Serial.print(control_items.flame_digital_status);
-    //   Serial.print(" (A:"); Serial.print(raw_flame_a); Serial.print(")");
-    //   Serial.print(" | [Gas] Status: "); Serial.print(control_items.gas_digital_status);
-    //   Serial.print(" (A:"); Serial.print(raw_gas_a); Serial.println(")");
-    //   Serial.print(" | Temp: "); Serial.println(control_items.dht_temp);
-    //   Serial.print(", Humidity: "); Serial.println(control_items.dht_humi);
-    // }
   }
+
 }
 
 void update_imu(uint32_t interval_ms)
