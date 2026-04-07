@@ -830,10 +830,12 @@ static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_c
       break;
 
     case ADDR_DEBUG_MODE:
-      if (control_items.debug_mode == true)
+      if (control_items.debug_mode == true) {
         // DEBUG_PRINTLN("Debug Mode : Enabled");
-      else
+      }
+      else {
         // DEBUG_PRINTLN("Debug Mode : Disabled");
+      }
       break;
 
     case ADDR_SOUND:

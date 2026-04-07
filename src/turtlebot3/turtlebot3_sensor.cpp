@@ -29,7 +29,7 @@ bool Turtlebot3Sensor::init(void)
 
   initBumper();
   initIR();
-  initSonar();
+  // initSonar();
   initLED();
 
   // add: 불꽃 센서 초기화 호출
