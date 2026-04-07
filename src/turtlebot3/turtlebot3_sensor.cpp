@@ -29,7 +29,7 @@ bool Turtlebot3Sensor::init(void)
 
   initBumper();
   initIR();
-  // initSonar();
+  initSonar();
   initLED();
 
   // add: 불꽃 센서 초기화 호출
@@ -294,67 +294,67 @@ float Turtlebot3Sensor::getIRsensorData(void)
   return ir_data;
 }
 
-// void Turtlebot3Sensor::initSonar(void)
-// {
-//   sonar_pin_.trig = BDPIN_GPIO_1;
-//   sonar_pin_.echo = BDPIN_GPIO_2;
+void Turtlebot3Sensor::initSonar(void)
+{
+  sonar_pin_.trig = BDPIN_GPIO_1;
+  sonar_pin_.echo = BDPIN_GPIO_2;
 
-//   pinMode(sonar_pin_.trig, OUTPUT);
-//   pinMode(sonar_pin_.echo, INPUT);
-// }
+  pinMode(sonar_pin_.trig, OUTPUT);
+  pinMode(sonar_pin_.echo, INPUT);
+}
 
-// void Turtlebot3Sensor::updateSonar(uint32_t t)
-// {
-//   static uint32_t t_time = 0;
-//   static bool make_pulse = TRUE;
-//   static bool get_duration = FALSE;
+void Turtlebot3Sensor::updateSonar(uint32_t t)
+{
+  static uint32_t t_time = 0;
+  static bool make_pulse = TRUE;
+  static bool get_duration = FALSE;
 
-//   float distance = 0.0, duration = 0.0;
+  float distance = 0.0, duration = 0.0;
 
-//   if (make_pulse == TRUE)
-//   {
-//     digitalWrite(sonar_pin_.trig, HIGH);
+  if (make_pulse == TRUE)
+  {
+    digitalWrite(sonar_pin_.trig, HIGH);
 
-//     if (t - t_time >= 10)
-//     {
-//       digitalWrite(sonar_pin_.trig, LOW);
+    if (t - t_time >= 10)
+    {
+      digitalWrite(sonar_pin_.trig, LOW);
 
-//       get_duration = TRUE;
-//       make_pulse = FALSE;
+      get_duration = TRUE;
+      make_pulse = FALSE;
 
-//       t_time = t;
-//     }
-//   }
+      t_time = t;
+    }
+  }
 
-//   if (get_duration == TRUE)
-//   {
-//     duration = pulseIn(sonar_pin_.echo, HIGH);
-//     distance = ((float)(340 * duration) / 10000) / 2;
+  if (get_duration == TRUE)
+  {
+    duration = pulseIn(sonar_pin_.echo, HIGH);
+    distance = ((float)(340 * duration) / 10000) / 2;
 
-//     make_pulse = TRUE;
-//     get_duration = FALSE;
-//   }
+    make_pulse = TRUE;
+    get_duration = FALSE;
+  }
 
-//   sonar_data_ = distance;
-// }
+  sonar_data_ = distance;
+}
 
-// float Turtlebot3Sensor::getSonarData(void)
-// {
-//   float distance = 0.0;
+float Turtlebot3Sensor::getSonarData(void)
+{
+  float distance = 0.0;
 
-//   distance = sonar_data_;
+  distance = sonar_data_;
 
-//   return distance;
-// }
+  return distance;
+}
 
-// float Turtlebot3Sensor::getIlluminationData(void)
-// {
-//   uint16_t light;
+float Turtlebot3Sensor::getIlluminationData(void)
+{
+  uint16_t light;
 
-//   light = analogRead(A2); // edit: A1에서 A2로 변경
+  light = analogRead(A1);
 
-//   return light;
-// }
+  return light;
+}
 
 void Turtlebot3Sensor::initLED(void)
 {
@@ -426,7 +426,7 @@ void Turtlebot3Sensor::setLedPattern(double linear_vel, double angular_vel)
 void Turtlebot3Sensor::initFlame(void)
 {
     flame_pin_ = 2; // OpenCR의 D2 핀
-    flame_analog_pin_ = A1;
+    flame_analog_pin_ = A2;
     pinMode(flame_pin_, INPUT);
 }
 
