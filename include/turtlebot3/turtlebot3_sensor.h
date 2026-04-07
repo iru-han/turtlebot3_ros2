@@ -45,6 +45,12 @@ typedef struct SONAR_PIN
   int echo;
 }SonarPin;
 
+enum DHTState {
+  IDLE,
+  REQUESTED,
+  READY
+};
+
 class Turtlebot3Sensor
 {
  public:
@@ -108,8 +114,9 @@ class Turtlebot3Sensor
 
   // add: 온습도 센서
   void initDHT(void);
-  float getTemperature(void);
-  float getHumidity(void);
+  void updateDHT_Async(); // 이 함수가 상태 머신의 핵심입니다.
+  uint32_t getTemp() { return last_temp_; }
+  uint32_t getHumi() { return last_humi_; }
 
  private:
   cIMU imu_;
@@ -135,6 +142,11 @@ class Turtlebot3Sensor
   // add: DHT 관련 변수 추가
   DHT *p_dht;
   int dht_pin_;
+  
+  DHTState dht_state_ = IDLE;
+  uint32_t last_request_time_ = 0;
+  uint32_t last_temp_ = 0;
+  uint32_t last_humi_ = 0;
 };
 
 #endif // TURTLEBOT3_SENSOR_H_

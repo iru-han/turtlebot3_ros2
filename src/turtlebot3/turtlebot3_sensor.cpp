@@ -444,7 +444,7 @@ float Turtlebot3Sensor::getFlameAnalogData(void)
 // add: 가스 센서 관련 변수 추가
 void Turtlebot3Sensor::initGas(void)
 {
-    gas_digital_pin_ = 8; // OpenCR의 8번핀
+    gas_digital_pin_ = 12; // OpenCR의 12번핀
     gas_analog_pin_ = A0;
     pinMode(gas_digital_pin_, INPUT);
 }
@@ -467,19 +467,22 @@ void Turtlebot3Sensor::initDHT(void) {
   p_dht->begin();
 }
 
-// add: 온도 읽기 (정수일 경우를 대비해 명시적 형변환 추가)
-float Turtlebot3Sensor::getTemperature(void) {
-  float temp = p_dht->readTemperature();
-  
-  // 만약 센서값이 읽히지 않으면(NaN) 0.0 반환, 성공하면 float으로 확실히 변환
-  if (isnan(temp)) return 0.0f; 
-  return (float)temp; 
-}
+void Turtlebot3Sensor::updateDHT_Async() {
+  uint32_t now = millis();
 
-// add: 습도 읽기 (정수일 경우를 대비해 명시적 형변환 추가)
-float Turtlebot3Sensor::getHumidity(void) {
-  float humi = p_dht->readHumidity();
-  
-  if (isnan(humi)) return 0.0f;
-  return (float)humi;
+  // 1단계: 10초마다 "나 이제 읽을 준비 할게"라고 신호만 줌 (IDLE -> REQUESTED)
+  if (dht_state_ == IDLE && now - last_request_time_ >= 10000) {
+    last_request_time_ = now;
+    dht_state_ = REQUESTED;
+    return; // 🛑 중요: 이번 루프는 여기서 끝내고 바로 라즈베리파이 응답하러 가기!
+  }
+
+  // 2단계: REQUESTED 상태가 되고 나서 2초가 흘렀는지 체크
+  if (dht_state_ == REQUESTED && now - last_request_time_ >= 2000) {
+    // 이제 센서가 데이터를 다 요리했을 시간임. 
+    // 아주 잠깐만 '감옥'에 들어갔다 나옴 (이 정도는 라즈베리파이가 봐줌)
+    last_temp_ = p_dht->readTemperature(); 
+    last_humi_ = p_dht->readHumidity();
+    dht_state_ = IDLE;
+  }
 }

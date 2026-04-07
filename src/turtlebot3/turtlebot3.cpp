@@ -278,8 +278,8 @@ typedef struct ControlItemVariables{
   bool gas_digital_status;
 
   // add: 온습도 디지털
-  float dht_temp;
-  float dht_humi;
+  int32_t dht_temp;
+  int32_t dht_humi;
 
   uint32_t bat_voltage_x100;
   uint32_t bat_percent_x100;
@@ -721,10 +721,9 @@ void update_battery_status(uint32_t interval_ms)
 void update_analog_sensors(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
-  static uint32_t pre_time_dht = 0;
-  static uint8_t dht_step = 0; // 0: 온도 읽기, 1: 습도 읽기
 
   // [Part 1] 빠른 센서 (가스, 불꽃, 조도 등) - 30ms 주기
+  // 이 안에는 CPU 점유 시간이 아주 짧은 동작만 넣습니다.
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
 
@@ -739,17 +738,14 @@ void update_analog_sensors(uint32_t interval_ms)
     control_items.gas_digital_status = (raw_gas_a >= 500) ? 1 : 0;
   }
 
-  // [Part 2] 느린 센서 (온습도) - 2초마다 하나씩 번갈아 가며 읽기
-  if(millis() - pre_time_dht >= 2000){
-    pre_time_dht = millis();
-    if(dht_step == 0) {
-      control_items.dht_temp = sensors.getTemperature();
-      dht_step = 1;
-    } else {
-      control_items.dht_humi = sensors.getHumidity();
-      dht_step = 0;
-    }
-  }
+  // [Part 2] 온습도 상태 머신 (30ms 주기에 갇히지 않게 밖으로 뺍니다)
+  // 이 함수는 호출되어도 조건(2초/10초 대기)이 안 맞으면 바로 리턴하므로 매우 안전합니다.
+  sensors.updateDHT_Async(); 
+
+  // 상태 머신이 내부적으로 온습도를 성공적으로 읽었을 때만 last_temp_, last_humi_가 갱신됩니다.
+  // 제어표(Control Table)의 값은 매 루프마다 최신 상태를 유지하도록 업데이트합니다.
+  control_items.dht_temp = (int32_t)sensors.getTemp();
+  control_items.dht_humi = (int32_t)sensors.getHumi();
 }
 
 void update_imu(uint32_t interval_ms)
