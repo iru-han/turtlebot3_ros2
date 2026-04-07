@@ -460,26 +460,27 @@ float Turtlebot3Sensor::getGasAnalogData(void)
     return (float)analogRead(gas_analog_pin_);
 }
 
-//  add: DHT 초기화
+// [수정] DHT 초기화 부분
 void Turtlebot3Sensor::initDHT(void) {
-  dht_pin_ = 4; // D4 핀 사용
-  p_dht = new DHT(dht_pin_, DHT11);
-  p_dht->begin();
+  // DHT_Async는 생성자에서 핀과 타입을 바로 정합니다.
+  // dht_pin_ 변수를 따로 선언하지 않았다면 바로 숫자를 넣으시면 됩니다.
+  p_dht = new DHT_Async(4, DHT_TYPE_11); 
+  
+  // [중요] DHT_Async 라이브러리에는 begin() 함수가 없습니다. 지워야 합니다.
+  last_measurement_time_ = millis();
 }
 
+// [수정] DHT 업데이트 부분
 void Turtlebot3Sensor::updateDHT_Async() {
   float temp, humi;
 
-  // 예제처럼 4초(4000ms)마다 한 번씩 측정을 시도합니다.
-  // 이 if문 덕분에 측정하는 찰나를 제외하면 CPU는 0.0001초도 멈추지 않습니다.
+  // 헤더에서 선언한 last_measurement_time_ 변수를 사용합니다.
   if (millis() - last_measurement_time_ > 4000ul) {
+    // p_dht는 헤더에서 DHT_Async* 로 선언되어 있어야 합니다.
     if (p_dht->measure(&temp, &humi)) {
-      last_temp_ = temp;
-      last_humi_ = humi;
+      last_temp_ = (int32_t)temp; // float을 int32_t로 변환하여 저장
+      last_humi_ = (int32_t)humi;
       last_measurement_time_ = millis();
-      
-      // 디버깅용 (테스트 후 주석 처리)
-      // DEBUG_PRINT("DHT Success: "); DEBUG_PRINT(temp); DEBUG_PRINTLN(humi);
     }
   }
 }
