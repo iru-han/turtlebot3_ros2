@@ -468,21 +468,18 @@ void Turtlebot3Sensor::initDHT(void) {
 }
 
 void Turtlebot3Sensor::updateDHT_Async() {
-  uint32_t now = millis();
+  float temp, humi;
 
-  // 1단계: 10초마다 "나 이제 읽을 준비 할게"라고 신호만 줌 (IDLE -> REQUESTED)
-  if (dht_state_ == IDLE && now - last_request_time_ >= 10000) {
-    last_request_time_ = now;
-    dht_state_ = REQUESTED;
-    return; // 🛑 중요: 이번 루프는 여기서 끝내고 바로 라즈베리파이 응답하러 가기!
-  }
-
-  // 2단계: REQUESTED 상태가 되고 나서 2초가 흘렀는지 체크
-  if (dht_state_ == REQUESTED && now - last_request_time_ >= 2000) {
-    // 이제 센서가 데이터를 다 요리했을 시간임. 
-    // 아주 잠깐만 '감옥'에 들어갔다 나옴 (이 정도는 라즈베리파이가 봐줌)
-    last_temp_ = p_dht->readTemperature(); 
-    last_humi_ = p_dht->readHumidity();
-    dht_state_ = IDLE;
+  // 예제처럼 4초(4000ms)마다 한 번씩 측정을 시도합니다.
+  // 이 if문 덕분에 측정하는 찰나를 제외하면 CPU는 0.0001초도 멈추지 않습니다.
+  if (millis() - last_measurement_time_ > 4000ul) {
+    if (p_dht->measure(&temp, &humi)) {
+      last_temp_ = temp;
+      last_humi_ = humi;
+      last_measurement_time_ = millis();
+      
+      // 디버깅용 (테스트 후 주석 처리)
+      // DEBUG_PRINT("DHT Success: "); DEBUG_PRINT(temp); DEBUG_PRINTLN(humi);
+    }
   }
 }

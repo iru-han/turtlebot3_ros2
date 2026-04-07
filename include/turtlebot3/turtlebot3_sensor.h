@@ -22,7 +22,7 @@
 #include "OLLO.h"
 
 // add: 온습도 센서 헤더 추가
-#include "DHT.h"
+#include <DHT_Async.h>
 
 #define ACCEL_FACTOR                      0.000598550415   // (ADC_Value / Scale) * 9.80665            => Range : +- 2[g]
                                                            //                                             Scale : +- 16384
@@ -44,12 +44,6 @@ typedef struct SONAR_PIN
   int trig;
   int echo;
 }SonarPin;
-
-enum DHTState {
-  IDLE,
-  REQUESTED,
-  READY
-};
 
 class Turtlebot3Sensor
 {
@@ -114,9 +108,9 @@ class Turtlebot3Sensor
 
   // add: 온습도 센서
   void initDHT(void);
-  void updateDHT_Async(); // 이 함수가 상태 머신의 핵심입니다.
-  uint32_t getTemp() { return last_temp_; }
-  uint32_t getHumi() { return last_humi_; }
+  void updateDHT_Async(); 
+  int32_t getTemp() { return last_temp_; }
+  int32_t getHumi() { return last_humi_; }
 
  private:
   cIMU imu_;
@@ -139,14 +133,10 @@ class Turtlebot3Sensor
   int gas_digital_pin_;   // D8 (Digital)
   int gas_analog_pin_;    // A0 (Analog)
 
-  // add: DHT 관련 변수 추가
-  DHT *p_dht;
-  int dht_pin_;
-  
-  DHTState dht_state_ = IDLE;
-  uint32_t last_request_time_ = 0;
-  uint32_t last_temp_ = 0;
-  uint32_t last_humi_ = 0;
+  DHT_Async *p_dht;                    // 새 라이브러리 객체 포인터
+  int32_t last_temp_ = 0;              // 마지막 온도 저장
+  int32_t last_humi_ = 0;              // 마지막 습도 저장
+  uint32_t last_measurement_time_ = 0; // 측정 주기 관리용 타이머
 };
 
 #endif // TURTLEBOT3_SENSOR_H_
