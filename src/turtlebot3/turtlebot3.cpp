@@ -150,9 +150,9 @@ enum ControlTableItemAddr{
   ADDR_IR              = 34,
   ADDR_SORNA           = 38,
 
-  ADDR_FLAME_DIGITAL = 32, // add: 불꽃 센서 상태 주소 (32번)
-  ADDR_GAS_DIGITAL = 33, // add: 가스 디지털 (33번)
-  ADDR_FLAME_ANALOG = 52, // add: 불꽃 아날로그 (2바이트 uint16 용)
+  ADDR_FLAME_DIGITAL = 144, // add: 불꽃 센서 상태 주소 (32번)
+  ADDR_GAS_DIGITAL = 145, // add: 가스 디지털 (33번)
+  ADDR_FLAME_ANALOG = 190, // add: 불꽃 아날로그 (2바이트 uint16 용)
   ADDR_GAS_ANALOG = 54, // add: 가스 아날로그 (2바이트 uint16 용)
   ADDR_DHT_TEMP = 112, // add: 온도
   ADDR_DHT_HUMI = 116, // add: 습도
@@ -788,9 +788,9 @@ void update_environmental_sensors(uint32_t interval_ms)
     control_items.gas_analog_value = raw_gas_a;
   }
 
-  // [Part 2] 느린 센서 (온습도 전용 주기: 5000ms 추천)
+  // [Part 2] 느린 센서 (온습도 전용 주기: 2000ms 추천)
   // DHT11은 데이터 시트상 최소 2초의 간격이 필요합니다.
-  if(millis() - pre_time_dht >= 5000){
+  if(millis() - pre_time_dht >= 2000){
     pre_time_dht = millis();
 
     // 여기서만 DHT 데이터를 읽습니다. 
