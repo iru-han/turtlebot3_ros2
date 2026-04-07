@@ -146,16 +146,14 @@ enum ControlTableItemAddr{
   ADDR_BUMPER_1        = 28,
   ADDR_BUMPER_2        = 29,
 
-  ADDR_ILLUMINATION    = 30,
+  // ADDR_ILLUMINATION    = 30,
   ADDR_IR              = 34,
-  ADDR_SORNA           = 38,
+  // ADDR_SORNA           = 38,
 
-  ADDR_FLAME_DIGITAL = 508, // add: 불꽃 센서 상태 주소 (32번)
-  ADDR_GAS_DIGITAL = 509, // add: 가스 디지털 (33번)
-  ADDR_FLAME_ANALOG = 510, // add: 불꽃 아날로그 (2바이트 uint16 용)
-  ADDR_GAS_ANALOG = 512, // add: 가스 아날로그 (2바이트 uint16 용)
-  ADDR_DHT_TEMP = 500, // add: 온도
-  ADDR_DHT_HUMI = 504, // add: 습도
+  ADDR_FLAME_DIGITAL = 54, // add: 불꽃 센서 상태 주소 (54번)
+  ADDR_GAS_DIGITAL = 55, // add: 가스 디지털 (55번)
+  ADDR_DHT_TEMP = 30, // add: 온도
+  ADDR_DHT_HUMI = 38, // add: 습도
 
   ADDR_BATTERY_VOLTAGE = 42,
   ADDR_BATTERY_PERCENT = 46,
@@ -270,17 +268,13 @@ typedef struct ControlItemVariables{
   bool push_button[2];
   bool bumper[2];
 
-  uint16_t illumination;
+  // uint16_t illumination;
   uint32_t ir_sensor;
-  float sornar;
+  // float sornar;
 
-  // add: 불꽃 디지털/아날로그
+  // add: 불꽃/가스 디지털
   bool flame_digital_status;
   bool gas_digital_status;
-
-  // add: 가스 디지털/아날로그
-  uint16_t flame_analog_value;
-  uint16_t gas_analog_value;
 
   // add: 온습도 디지털
   float dht_temp;
@@ -363,32 +357,32 @@ void TurtleBot3Core::begin(const char* model_name)
   min_angular_velocity = -max_angular_velocity;
 
   bool ret; (void)ret;
-  DEBUG_SERIAL_BEGIN(57600);
-  DEBUG_PRINTLN(" ");
-  DEBUG_PRINTLN("Version : V221004R1");
-  DEBUG_PRINTLN("Begin Start...");
+  // DEBUG_SERIAL_BEGIN(57600);
+  // DEBUG_PRINTLN(" ");
+  // DEBUG_PRINTLN("Version : V221004R1");
+  // DEBUG_PRINTLN("Begin Start...");
 
   // Setting for Dynamixel motors
   ret = motor_driver.init();
-  DEBUG_PRINTLN(ret==true?"Motor driver setup completed.":"Motor driver setup failed.");
+  // DEBUG_PRINTLN(ret==true?"Motor driver setup completed.":"Motor driver setup failed.");
   // Setting for IMU
   ret = sensors.init();
-  DEBUG_PRINTLN(ret==true?"Sensors setup completed.":"Sensors setup failed.");
+  // DEBUG_PRINTLN(ret==true?"Sensors setup completed.":"Sensors setup failed.");
   // Init diagnosis
   ret = diagnosis.init();
-  DEBUG_PRINTLN(ret==true?"Diagnosis setup completed.":"Diagnosis setup failed.");
+  // DEBUG_PRINTLN(ret==true?"Diagnosis setup completed.":"Diagnosis setup failed.");
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
   ret = controllers.init(max_linear_velocity, max_angular_velocity);
-  DEBUG_PRINTLN(ret==true?"RC100 Controller setup completed.":"RC100 Controller setup failed.");
+  // DEBUG_PRINTLN(ret==true?"RC100 Controller setup completed.":"RC100 Controller setup failed.");
 
   if (p_tb3_model_info->has_manipulator == true)
   {    
     ret = manipulator_driver.init();
-    DEBUG_PRINTLN(ret==true?"Manipulator driver setup completed.":"Manipulator driver setup failed.");
+    // DEBUG_PRINTLN(ret==true?"Manipulator driver setup completed.":"Manipulator driver setup failed.");
   }
 
-  DEBUG_PRINT("Dynamixel2Arduino Item Max : ");
-  DEBUG_PRINTLN(CONTROL_ITEM_MAX);
+  // DEBUG_PRINT("Dynamixel2Arduino Item Max : ");
+  // DEBUG_PRINTLN(CONTROL_ITEM_MAX);
 
   control_items.debug_mode = false;
   control_items.is_connect_ros2_node = false;
@@ -429,15 +423,13 @@ void TurtleBot3Core::begin(const char* model_name)
   dxl_slave.addControlItem(ADDR_BUMPER_1, control_items.bumper[0]);
   dxl_slave.addControlItem(ADDR_BUMPER_2, control_items.bumper[1]);
   // Items for Analog sensors
-  dxl_slave.addControlItem(ADDR_ILLUMINATION, control_items.illumination);
+  // dxl_slave.addControlItem(ADDR_ILLUMINATION, control_items.illumination);
   dxl_slave.addControlItem(ADDR_IR, control_items.ir_sensor);
-  dxl_slave.addControlItem(ADDR_SORNA, control_items.sornar);
+  // dxl_slave.addControlItem(ADDR_SORNA, control_items.sornar);
   
   // add: 불꽃/가스/온습도 센서 항목을 제어 표에 등록
   dxl_slave.addControlItem(ADDR_FLAME_DIGITAL, control_items.flame_digital_status);
   dxl_slave.addControlItem(ADDR_GAS_DIGITAL, control_items.gas_digital_status);
-  dxl_slave.addControlItem(ADDR_FLAME_ANALOG, control_items.flame_analog_value);
-  dxl_slave.addControlItem(ADDR_GAS_ANALOG, control_items.gas_analog_value);
   dxl_slave.addControlItem(ADDR_DHT_TEMP, control_items.dht_temp);
   dxl_slave.addControlItem(ADDR_DHT_HUMI, control_items.dht_humi);
 
@@ -560,13 +552,13 @@ void TurtleBot3Core::begin(const char* model_name)
     motor_driver.set_torque(true);
     control_items.device_status = STATUS_RUNNING;
     set_connection_state_with_motors(true);
-    DEBUG_PRINTLN("Wheel motors are connected");
+    // DEBUG_PRINTLN("Wheel motors are connected");
   }else{
     control_items.device_status = STATUS_NOT_CONNECTED_MOTORS;
     set_connection_state_with_motors(false);
-    DEBUG_PRINTLN("Can't communicate with the motor!");
-    DEBUG_PRINTLN("  Please check the connection to the motor and the power supply.");
-    DEBUG_PRINTLN();
+    // DEBUG_PRINTLN("Can't communicate with the motor!");
+    // DEBUG_PRINTLN("  Please check the connection to the motor and the power supply.");
+    // DEBUG_PRINTLN();
   } 
   control_items.is_connect_motors = get_connection_state_with_motors();  
 
@@ -576,13 +568,13 @@ void TurtleBot3Core::begin(const char* model_name)
       manipulator_driver.set_torque(true);    
       control_items.is_connect_manipulator = true;
       set_connection_state_with_joints(true);
-      DEBUG_PRINTLN("Joint motors are connected");      
+      // DEBUG_PRINTLN("Joint motors are connected");      
     }else{
       control_items.is_connect_manipulator = false;
       set_connection_state_with_joints(false);
-      DEBUG_PRINTLN("Can't communicate with the joint!");
-      DEBUG_PRINTLN("  Please check the connection to the joint motor and the power supply.");
-      DEBUG_PRINTLN();
+      // DEBUG_PRINTLN("Can't communicate with the joint!");
+      // DEBUG_PRINTLN("  Please check the connection to the joint motor and the power supply.");
+      // DEBUG_PRINTLN();
     } 
   }
 
@@ -593,7 +585,7 @@ void TurtleBot3Core::begin(const char* model_name)
   //To indicate that the initialization is complete.
   // sensors.makeMelody(1); 
 
-  DEBUG_PRINTLN("Begin End...");
+  // DEBUG_PRINTLN("Begin End...");
 }
 
 /*******************************************************************************
@@ -734,17 +726,15 @@ void update_analog_sensors(uint32_t interval_ms)
   // [Part 1] 빠른 센서 (가스, 불꽃, 조도 등) - 30ms 주기
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
-    control_items.illumination = (uint16_t)sensors.getIlluminationData();
+    // control_items.illumination = (uint16_t)sensors.getIlluminationData();
     control_items.ir_sensor = (uint32_t)sensors.getIRsensorData();
-    control_items.sornar = (float)sensors.getSonarData();
+    // control_items.sornar = (float)sensors.getSonarData();
 
     uint16_t raw_flame_a = (uint16_t)sensors.getFlameAnalogData();
     uint16_t raw_gas_a = (uint16_t)sensors.getGasAnalogData();
 
     control_items.flame_digital_status = (raw_flame_a <= 300) ? 1 : 0;
     control_items.gas_digital_status = (raw_gas_a >= 500) ? 1 : 0;
-    control_items.flame_analog_value = raw_flame_a;
-    control_items.gas_analog_value = raw_gas_a;
   }
 
   // [Part 2] 느린 센서 (온습도) - 2초마다 하나씩 번갈아 가며 읽기
@@ -841,9 +831,9 @@ static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_c
 
     case ADDR_DEBUG_MODE:
       if (control_items.debug_mode == true)
-        DEBUG_PRINTLN("Debug Mode : Enabled");
+        // DEBUG_PRINTLN("Debug Mode : Enabled");
       else
-        DEBUG_PRINTLN("Debug Mode : Disabled");
+        // DEBUG_PRINTLN("Debug Mode : Disabled");
       break;
 
     case ADDR_SOUND:
