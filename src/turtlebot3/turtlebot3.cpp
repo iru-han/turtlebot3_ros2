@@ -150,12 +150,12 @@ enum ControlTableItemAddr{
   ADDR_IR              = 34,
   ADDR_SORNA           = 38,
 
-  ADDR_FLAME_DIGITAL = 144, // add: 불꽃 센서 상태 주소 (32번)
-  ADDR_GAS_DIGITAL = 145, // add: 가스 디지털 (33번)
-  ADDR_FLAME_ANALOG = 190, // add: 불꽃 아날로그 (2바이트 uint16 용)
-  ADDR_GAS_ANALOG = 192, // add: 가스 아날로그 (2바이트 uint16 용)
-  ADDR_DHT_TEMP = 112, // add: 온도
-  ADDR_DHT_HUMI = 116, // add: 습도
+  ADDR_FLAME_DIGITAL = 508, // add: 불꽃 센서 상태 주소 (32번)
+  ADDR_GAS_DIGITAL = 509, // add: 가스 디지털 (33번)
+  ADDR_FLAME_ANALOG = 510, // add: 불꽃 아날로그 (2바이트 uint16 용)
+  ADDR_GAS_ANALOG = 512, // add: 가스 아날로그 (2바이트 uint16 용)
+  ADDR_DHT_TEMP = 500, // add: 온도
+  ADDR_DHT_HUMI = 504, // add: 습도
 
   ADDR_BATTERY_VOLTAGE = 42,
   ADDR_BATTERY_PERCENT = 46,
