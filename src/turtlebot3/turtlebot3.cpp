@@ -270,7 +270,7 @@ typedef struct ControlItemVariables{
   bool push_button[2];
   bool bumper[2];
 
-  uint16_t illumination;
+  float illumination;
   uint32_t ir_sensor;
   float sornar;
 
