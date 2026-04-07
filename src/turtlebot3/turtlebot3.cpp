@@ -117,7 +117,7 @@ static void update_times(uint32_t interval_ms);
 static void update_gpios(uint32_t interval_ms);
 static void update_motor_status(uint32_t interval_ms);
 static void update_battery_status(uint32_t interval_ms);
-static void update_environmental_sensors(uint32_t interval_ms);
+static void update_analog_sensors(uint32_t interval_ms);
 static void update_joint_status(uint32_t interval_ms);
 
 
@@ -363,7 +363,7 @@ void TurtleBot3Core::begin(const char* model_name)
   min_angular_velocity = -max_angular_velocity;
 
   bool ret; (void)ret;
-  // DEBUG_SERIAL_BEGIN(57600);
+  DEBUG_SERIAL_BEGIN(57600);
   DEBUG_PRINTLN(" ");
   DEBUG_PRINTLN("Version : V221004R1");
   DEBUG_PRINTLN("Begin Start...");
@@ -633,7 +633,7 @@ void TurtleBot3Core::run()
   update_gpios(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_motor_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_battery_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
-  update_environmental_sensors(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  update_analog_sensors(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_joint_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
 
   // Packet processing with ROS2 Node.
@@ -725,94 +725,39 @@ void update_battery_status(uint32_t interval_ms)
   }
 }
 
-// add: 로그용
-// void update_environmental_sensors(uint32_t interval_ms)
-// {
-//   static uint32_t pre_time = 0;
-//   static uint32_t last_print_time = 0; // 프린트 주기 관리용 추가
-
-//   if(millis() - pre_time >= interval_ms){
-//     pre_time = millis();
-
-//     // 데이터 읽기
-//     control_items.flame_digital_status = sensors.getFlameDigitalData();
-//     control_items.flame_analog_value = (uint16_t)sensors.getFlameAnalogData();
-//     control_items.gas_digital_status = sensors.getGasDigitalData();
-//     control_items.gas_analog_value = (uint16_t)sensors.getGasAnalogData();
-
-//     // 0.5초(500ms)마다 한 번씩만 깔끔하게 출력
-//     if(millis() - last_print_time >= 500){
-//       last_print_time = millis();
-//       Serial.print("[Flame] D:"); Serial.println(control_items.flame_digital_status);
-//       Serial.print(" A:"); Serial.println(control_items.flame_analog_value);
-//       Serial.print(" | [Gas] D:"); Serial.println(control_items.gas_digital_status);
-//       Serial.print(" A:"); Serial.println(control_items.gas_analog_value);
-//     }
-//   }
-// }
-
-void update_environmental_sensors(uint32_t interval_ms)
+void update_analog_sensors(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
-  static uint32_t pre_time_dht = 0; // add: 온습도 전용 타이머 변수
-  static uint32_t last_beep_time = 0;
-  static uint32_t last_print_time = 0;
+  static uint32_t pre_time_dht = 0;
+  static uint8_t dht_step = 0; // 0: 온도 읽기, 1: 습도 읽기
 
-  // [Part 1] 빠른 센서들 (기존 interval_ms 주기: 보통 30ms)
+  // [Part 1] 빠른 센서 (가스, 불꽃, 조도 등) - 30ms 주기
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
-
-    // 조도, IR, 소나 업데이트
     control_items.illumination = (float)sensors.getIlluminationData();
     control_items.ir_sensor = (uint32_t)sensors.getIRsensorData();
     control_items.sornar = (float)sensors.getSonarData();
 
-    // 불꽃/가스 데이터 업데이트
     uint16_t raw_flame_a = (uint16_t)sensors.getFlameAnalogData();
     uint16_t raw_gas_a = (uint16_t)sensors.getGasAnalogData();
 
-    if (raw_flame_a <= 300) control_items.flame_digital_status = 1;
-    else control_items.flame_digital_status = 0;
-
-    if (raw_gas_a >= 500) control_items.gas_digital_status = 1;
-    else control_items.gas_digital_status = 0;
-
-    // 경고음 로직
-    if (control_items.flame_digital_status == 1 || control_items.gas_digital_status == 1) {
-      if (millis() - last_beep_time >= 500) {
-        last_beep_time = millis();
-        tone(BDPIN_BUZZER, 1000, 100); 
-      }
-    }
-
+    control_items.flame_digital_status = (raw_flame_a <= 300) ? 1 : 0;
+    control_items.gas_digital_status = (raw_gas_a >= 500) ? 1 : 0;
     control_items.flame_analog_value = raw_flame_a;
     control_items.gas_analog_value = raw_gas_a;
-
-    
-  
-    // 5. 디버깅 출력 (0.5초마다)
-    // if(millis() - last_print_time >= 500){
-    //   last_print_time = millis();
-        
-    //   Serial.print("[DEBUG] Flame A: "); Serial.print(raw_flame_a);
-    //   Serial.print(" | Gas A: "); Serial.print(raw_gas_a);
-    //   Serial.print(" | Flame D: "); Serial.print(control_items.flame_digital_status);
-    //   Serial.print(" | Gas D: "); Serial.println(control_items.gas_digital_status);
-    // }
   }
 
-  // [Part 2] 느린 센서 (온습도 전용 주기: 2000ms 추천)
-  // DHT11은 데이터 시트상 최소 2초의 간격이 필요합니다.
+  // [Part 2] 느린 센서 (온습도) - 2초마다 하나씩 번갈아 가며 읽기
   if(millis() - pre_time_dht >= 2000){
     pre_time_dht = millis();
-
-    // 여기서만 DHT 데이터를 읽습니다. 
-    // 2초마다 한 번씩만 '지연'이 발생하므로 통신 에러 확률이 급격히 낮아집니다.
-    control_items.dht_temp = sensors.getTemperature();
-    control_items.dht_humi = sensors.getHumidity();
-
+    if(dht_step == 0) {
+      control_items.dht_temp = sensors.getTemperature();
+      dht_step = 1;
+    } else {
+      control_items.dht_humi = sensors.getHumidity();
+      dht_step = 0;
+    }
   }
-
 }
 
 void update_imu(uint32_t interval_ms)
