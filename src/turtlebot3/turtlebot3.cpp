@@ -270,7 +270,7 @@ typedef struct ControlItemVariables{
   bool push_button[2];
   bool bumper[2];
 
-  float illumination;
+  uint16_t illumination;
   uint32_t ir_sensor;
   float sornar;
 
@@ -734,7 +734,7 @@ void update_analog_sensors(uint32_t interval_ms)
   // [Part 1] 빠른 센서 (가스, 불꽃, 조도 등) - 30ms 주기
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
-    control_items.illumination = (float)sensors.getIlluminationData();
+    control_items.illumination = (uint16_t)sensors.getIlluminationData();
     control_items.ir_sensor = (uint32_t)sensors.getIRsensorData();
     control_items.sornar = (float)sensors.getSonarData();
 
