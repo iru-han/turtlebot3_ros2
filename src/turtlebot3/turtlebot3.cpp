@@ -754,55 +754,49 @@ void update_battery_status(uint32_t interval_ms)
 void update_environmental_sensors(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
-  static uint32_t last_print_time = 0;
-  static uint32_t last_beep_time = 0; // 삑 소리 간격 조절용
+  static uint32_t pre_time_dht = 0; // add: 온습도 전용 타이머 변수
+  static uint32_t last_beep_time = 0;
 
+  // [Part 1] 빠른 센서들 (기존 interval_ms 주기: 보통 30ms)
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
 
+    // 조도, IR, 소나 업데이트
     control_items.illumination = (uint16_t)sensors.getIlluminationData();
     control_items.ir_sensor = (uint32_t)sensors.getIRsensorData();
     control_items.sornar = (float)sensors.getSonarData();
 
-    // 1. Raw 데이터 먼저 읽기 (임시 변수에 저장)
-    bool raw_flame_d = sensors.getFlameDigitalData();
+    // 불꽃/가스 데이터 업데이트
     uint16_t raw_flame_a = (uint16_t)sensors.getFlameAnalogData();
-    bool raw_gas_d = sensors.getGasDigitalData();
     uint16_t raw_gas_a = (uint16_t)sensors.getGasAnalogData();
 
-    // 2. [Flame 로직] 아날로그 300 이하 OR 디지털 1 이면 최종 1(위험)
-    // if (raw_flame_a <= 300 || raw_flame_d == 1) {
-    if (raw_flame_a <= 300) {
-      control_items.flame_digital_status = 1;
-    } else {
-      control_items.flame_digital_status = 0;
-    }
+    if (raw_flame_a <= 300) control_items.flame_digital_status = 1;
+    else control_items.flame_digital_status = 0;
 
-    // 3. [Gas 로직] 아날로그 400 초과이면 최종 1(위험)
-    if (raw_gas_a >= 400) {
-    // if (raw_gas_a >= 400 || raw_gas_d == 0) {
-      control_items.gas_digital_status = 1;
-    } else {
-      control_items.gas_digital_status = 0;
-    }
+    if (raw_gas_a >= 400) control_items.gas_digital_status = 1;
+    else control_items.gas_digital_status = 0;
 
-    // 4. [경고음 로직] 둘 중 하나라도 위험하면 "삑" 소리 출력
+    // 경고음 로직
     if (control_items.flame_digital_status == 1 || control_items.gas_digital_status == 1) {
-      // 너무 자주 소리 나면 시끄러우므로 0.5초마다 한 번씩 삑!
       if (millis() - last_beep_time >= 500) {
         last_beep_time = millis();
-        // 1000Hz 주파수로 100ms(0.1초) 동안 소리 내기
         tone(BDPIN_BUZZER, 1000, 100); 
       }
     }
 
-    // 4. 아날로그 수치도 ROS로 보내기 위해 저장 (필요 시)
     control_items.flame_analog_value = raw_flame_a;
     control_items.gas_analog_value = raw_gas_a;
+  }
 
+  // [Part 2] 느린 센서 (온습도 전용 주기: 2000ms 추천)
+  // DHT11은 데이터 시트상 최소 2초의 간격이 필요합니다.
+  if(millis() - pre_time_dht >= 2000){
+    pre_time_dht = millis();
+
+    // 여기서만 DHT 데이터를 읽습니다. 
+    // 2초마다 한 번씩만 '지연'이 발생하므로 통신 에러 확률이 급격히 낮아집니다.
     control_items.dht_temp = sensors.getTemperature();
     control_items.dht_humi = sensors.getHumidity();
-
 
     // 5. 디버깅 출력 (0.5초마다)
     // if(millis() - last_print_time >= 500){
