@@ -363,7 +363,7 @@ void TurtleBot3Core::begin(const char* model_name)
   min_angular_velocity = -max_angular_velocity;
 
   bool ret; (void)ret;
-  DEBUG_SERIAL_BEGIN(57600);
+  // DEBUG_SERIAL_BEGIN(57600);
   DEBUG_PRINTLN(" ");
   DEBUG_PRINTLN("Version : V221004R1");
   DEBUG_PRINTLN("Begin Start...");
@@ -788,9 +788,9 @@ void update_environmental_sensors(uint32_t interval_ms)
     control_items.gas_analog_value = raw_gas_a;
   }
 
-  // [Part 2] 느린 센서 (온습도 전용 주기: 2000ms 추천)
+  // [Part 2] 느린 센서 (온습도 전용 주기: 5000ms 추천)
   // DHT11은 데이터 시트상 최소 2초의 간격이 필요합니다.
-  if(millis() - pre_time_dht >= 2000){
+  if(millis() - pre_time_dht >= 5000){
     pre_time_dht = millis();
 
     // 여기서만 DHT 데이터를 읽습니다. 
