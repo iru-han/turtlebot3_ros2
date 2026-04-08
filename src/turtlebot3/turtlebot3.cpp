@@ -151,10 +151,10 @@ enum ControlTableItemAddr{
   ADDR_SORNA           = 38,
 
   // add: 상태 주소
-  ADDR_DHT_TEMP      = 400, // 4바이트 (400~403)
-  ADDR_DHT_HUMI      = 404, // 4바이트 (404~407)
-  ADDR_FLAME_DIGITAL = 408, // 1바이트 (408)
-  ADDR_GAS_DIGITAL   = 409, // 1바이트 (409)
+  ADDR_DHT_TEMP      = 51, // 4바이트
+  ADDR_DHT_HUMI      = 55, // 4바이트
+  ADDR_FLAME_DIGITAL = 112, // 1바이트
+  ADDR_GAS_DIGITAL   = 113, // 1바이트
 
   ADDR_BATTERY_VOLTAGE = 42,
   ADDR_BATTERY_PERCENT = 46,
